@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="sr">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="SSL/TLS demonstration - master thesis">
+		<meta name="author" content="Milica Matijevic">
+		
+		<script src="static/js/jquery-3.2.1.js"></script>
+		<script src="static/js/bootstrap.js"></script>
+		
+		<link href="static/css/bootstrap.min.css" rel="stylesheet">
+		<link href="static/css/animate.min.css" rel="stylesheet">
+		<link href="static/css/tls12.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+		<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+		
+		
+		<style>
+			#client, #server {
+			  height: 200px;
+			  width: 200px;
+			  border-radius: 50%;
+			  background-color: #1414B8;
+			  animation-name: stretch;
+			  animation-duration: 1.5s; 
+			  animation-timing-function: ease-out; 
+			  animation-delay: 0;
+			  animation-direction: alternate;
+			  animation-iteration-count: infinite;
+			  animation-fill-mode: none;
+			  animation-play-state: paused;
+			  text-align: center;
+			  visibility: hidden;
+			}
+			
+			#client1, #server1 {
+			  height: 100px;
+			  width: 100px;
+			  margin-right: -10%;
+			  border-radius: 50%;
+			  background-color: #1414B8;
+			  animation-name: stretch;
+			  animation-duration: 1.5s; 
+			  animation-timing-function: ease-out; 
+			  animation-delay: 0;
+			  animation-direction: alternate;
+			  animation-iteration-count: infinite;
+			  animation-fill-mode: none;
+			  animation-play-state: paused;
+			  text-align: center;
+			  visibility: hidden;
+			}
+			
+			#client p, #server p {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  font-size: 200%;
+			  color: #F7EDD4;
+			  font-weight: bold;
+			}
+			
+			#client1 p, #server1 p {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  font-size: 150%;
+			  color: #F7EDD4;
+			  font-weight: bold;
+			}
+			
+			@keyframes stretch {
+			  0% {
+			    transform: scale(.8);
+			    background-color: #1414B8;
+			  }
+			  100% {
+			    transform: scale(1.5);
+			  }
+			}
+			
+			#arr-instr {
+				animation-name: instruction;
+			  	animation-duration: .5s; 
+			  	animation-timing-function: ease-out; 
+			  	animation-delay: 0;
+			  	animation-direction: alternate;
+			  	animation-iteration-count: infinite;
+			  	animation-fill-mode: none;
+			  	animation-play-state: running;
+			  	display: inline-block;
+			  	margin-left: 20%;
+			  	padding-right: 10%;
+			}
+			
+			@keyframes instruction {
+				0% {
+					transform: translateX(50%);
+				}
+				100% {
+					transform: translateX(-30%);
+				}
+			}
+			
+			/*#client {
+				float: left;
+				margin-left: 10%;
+			}
+			
+			#server{
+				float: right;
+				margin-right: 10%;
+			}*/
+			
+			#client1 {
+				float: left;
+				margin-left: 25%;
+			}
+			
+			#server1 {
+				float: right;
+				margin-right: 10%;
+			}
+			
+			.sidenav {
+				height: 100%;
+				width: 300px;
+				position: fixed;
+				z-index: -1;
+				top: 0;
+				left: 0;
+				background-color: #FCBA12;
+				overflow-x: hidden;
+				padding-top: 200px;
+				visibility: hidden;
+			}
+			
+			.sidenav a, .button-as-link {
+				border: none;
+				outline: none;
+				background: none;	
+				color: #090934;
+				display: block;
+				width: 100%;
+				text-align: left;
+				cursor: pointer;
+				padding-left: 10px;
+				font-size: 20px;
+				font-weight: bold;
+			}
+			
+			.sidenav a:hover{
+				color: white;
+				text-decoration: none;
+			}
+			
+			.field-header, .field {
+				margin: 3px;
+				color: white;
+				font-size: 16pt;
+				display: flex;
+			  	justify-content: center;
+			  	align-items: center;
+			}
+			
+			.field-header {
+				background-color: #090934;
+			}
+			
+			.field {
+				background-color: #2E2FE3;
+			}
+			
+			.field:hover, .field-header:hover {
+				transform: scale(2);
+				z-index: 1;
+			}
+			
+			#clienthello-list li, #serverhello-list li, #servercert-list li, #serverhellodone-list li, #servercertstatus-list li, #serverkeyexchange-list li, #clientkeyexchange-list li, #clientchangecipherspec-list li, #clienthandshakefinished-list li, #serverchangecipherspec-list li, #serverhandshakefinished-list li {
+				margin-right: 10px;
+				border-style: groove;
+				border-radius: 10px; 
+			}
+			
+			@keyframes messageclient {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 80%;	
+					top: 10%;
+				}
+			}
+			
+			@keyframes messageserver {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 10%;
+				}
+			}
+			
+			@keyframes messageservercert {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 10%;
+				}
+			}
+			
+			@keyframes messageserverhellodone {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 15%;
+				}
+			}
+			
+			@keyframes messageservercertstatus {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 15%;
+				}
+			}
+			
+			@keyframes messageserverkeyexchange {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 10%;
+				}
+			}
+			
+			@keyframes messageclientkeyexchange {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 80%;	
+					top: 10%;
+				}
+			}
+			
+			@keyframes messageclientchangecipherspec {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 80%;	
+					top: 15%;
+				}
+			}
+			
+			@keyframes messageclienthandshakefinished {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 80%;	
+					top: 12%;
+				}
+			}
+			
+			@keyframes messageserverchangecipherspec {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 15%;
+				}
+			}
+			
+			@keyframes messageserverhandshakefinished {
+				0% {
+					transform: scale(.5);
+					position: absolute;
+					transform: translateX(40%);
+				}
+				100% {
+					transform: scale(.3);
+					left: 5.5%;	
+					top: 10%;
+				}
+			}
+			
+			.header {
+				padding: 15px;
+				text-align: center;
+				background: #090934;
+				color: #FCBA12;
+				font-size: 30px;
+				font-weight: bold;		
+			}
+			
+			.footer {
+				padding: 5px;
+				text-align: center;
+				background: #090934;
+				color: #FCBA12;
+				font-size: 15px;		
+			}
+			
+			body {
+				background-color: #F7EDD4;
+			}
+		
+		</style>
+		
+	</head>
+	<body>
+		<div class="header">
+			<h1>TLS 1.2</h1>
+			<p>Демонстрација <i>Handshake</i> протокола</p>
+		</div>
+		
+		<div id='start'>
+			<div class="row justify-content-center" style="padding-top: 150px;">
+				<button id="start-button" class="btn-primary btn-lg vertical-middle" style="padding: 20px; background-color: #FCBA12; color: #090934; font-weight: bold; border: none;">Започните негоцијацију клијента и сервера</button>
+			</div>
+			<div class="row justify-content-center" style="padding: 35px;">
+				<span style="color: #1414B8;">
+					<i class="fas fa-shield-alt fa-7x"></i>
+				</span>
+			</div>
+		</div>
+		
+		<!--<div id="client">
+			<p>Клијент</p>
+		</div>
+		
+		<div id="server">
+			<p>Сервер</p>
+		</div>-->
+		
+		<div id="client1">
+			<p>Клијент</p>
+		</div>
+		
+		<div id="server1">
+			<p>Сервер</p>
+		</div>
+		
+		<div class="footer">
+			<p id="statusbar">Милица Матијевић</p>
+		</div>
+		
+		<div class="sidenav"></div>
+		
+		<div id='clienthello-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='serverhello-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='servercert-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='serverhellodone-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='servercertstatus-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='serverkeyexchange-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='clientkeyexchange-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='clientchangecipherspec-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='clienthandshakefinished-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='serverchangecipherspec-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div id='serverhandshakefinished-grid' class='container-fluid' style="width: 30%; max-height: 160px; position: absolute; top: 50%; left: 80%; transform: translate(-50%, -50%)">
+			<div class='row'></div>
+		</div>
+		
+		<div class='container'>
+			<div id='cipher-suite-modal' class="modal fade" role='dialog'>
+				<div class="modal-dialog modal-lg">
+					<div class='modal-content'>
+						<div class='modal-body'>
+							<table class='table'>
+								<tr>
+									<td>CCA8</td>
+									<td><a href='#' id='cca8' class='list-group-item'>TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>CCA9</td>
+									<td><a href='#' id='cca9' class='list-group-item'>TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>C02F</td>
+									<td><a href='#' id='c02F' class='list-group-item'>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>C030</td>
+									<td><a href='#' id='c030' class='list-group-item'>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</a></td>
+								</tr>
+								<tr>
+									<td>C02B</td>
+									<td><a href='#' id='c02b' class='list-group-item'>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>C02C</td>
+									<td><a href='#' id='c02c' class='list-group-item'>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</a></td>
+								</tr>
+								<tr>
+									<td>C013</td>
+									<td><a href='#' id='c013' class='list-group-item'>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>C009</td>
+									<td><a href='#' id='c009' class='list-group-item'>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>C014</td>
+									<td><a href='#' id='c014' class='list-group-item'>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>C00A</td>
+									<td><a href='#' id='c00a' class='list-group-item'>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>009C</td>
+									<td><a href='#' id='009c' class='list-group-item'>TLS_RSA_WITH_AES_128_GCM_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>009D</td>
+									<td><a href='#' id='009d' class='list-group-item'>TLS_RSA_WITH_AES_256_GCM_SHA384</a></td>
+								</tr>
+								<tr>
+									<td>002F</td>
+									<td><a href='#' id='002f' class='list-group-item'>TLS_RSA_WITH_AES_128_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>0035</td>
+									<td><a href='#' id='0035' class='list-group-item'>TLS_RSA_WITH_AES_256_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>C012</td>
+									<td><a href='#' id='c012' class='list-group-item'>TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA</a></td>
+								</tr>
+								<tr>
+									<td>000A</td>
+									<td><a href='#' id='000a' class='list-group-item'>TLS_RSA_WITH_3DES_EDE_CBC_SHA</a></td>
+								</tr>
+							</table>
+						</div>
+						<div class='modal-footer'>
+							<button type='button' id='modal-btn' class="btn btn-default" data-dismiss='modal'>Потврди</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class='container'>
+			<div id='signature-algorithms-modal' class="modal fade" role='dialog'>
+				<div class="modal-dialog modal-lg">
+					<div class='modal-content'>
+						<div class='modal-body'>
+							<table class='table'>
+								<tr>
+									<td>0601</td>
+									<td><a href='#' id='0601' class='list-group-item'>RSA_PKCS1_SHA512</a></td>
+								</tr>
+								<tr>
+									<td>0603</td>
+									<td><a href='#' id='0603' class='list-group-item'>ECDSA_SECP521R1_SHA512</a></td>
+								</tr>
+								<tr>
+									<td>0501</td>
+									<td><a href='#' id='0501' class='list-group-item'>RSA_PKCS1_SHA384</a></td>
+								</tr>
+								<tr>
+									<td>0503</td>
+									<td><a href='#' id='0503' class='list-group-item'>ECDSA_SECP384R1_SHA384</a></td>
+								</tr>
+								<tr>
+									<td>0401</td>
+									<td><a href='#' id='0401' class='list-group-item'>RSA_PKCS_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>0403</td>
+									<td><a href='#' id='0403' class='list-group-item'>ECDSA_SECP256R1_SHA256</a></td>
+								</tr>
+								<tr>
+									<td>0301</td>
+									<td><a href='#' id='0301' class='list-group-item'>SHA224_RSA</a></td>
+								</tr>
+								<tr>
+									<td>0303</td>
+									<td><a href='#' id='0303' class='list-group-item'>SHA224_ECDSA</a></td>
+								</tr>
+								<tr>
+									<td>0201</td>
+									<td><a href='#' id='0201' class='list-group-item'>RSA_PKCS1_SHA1</a></td>
+								</tr>
+								<tr>
+									<td>0203</td>
+									<td><a href='#' id='0203' class='list-group-item'>ECDSA_SHA1</a></td>
+								</tr>
+							</table>
+						</div>
+						<div class='modal-footer'>
+							<button type='button' id='signature-algorithms-modal-btn' class="btn btn-default" data-dismiss='modal'>Потврди</button>
+						</div>
+					</div>
+				</div>		
+			</div>
+		</div>
+		
+		<div class='container'>
+			<div id='server-cipher-suite-modal' class="modal fade" role='dialog'>
+				<div class="modal-dialog modal-lg">
+					<div class='modal-content'>
+						<div class='modal-body'>
+							<table class='table' id='server-cipher-suite-modal-table'>
+								
+							</table>
+						</div>
+						<div class='modal-footer'>
+							<button type='button' id='server-cipher-suite-modal-btn' class="btn btn-default" data-dismiss='modal'>Потврди</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class='container'>
+			<div id='server-hashsign-suite-modal' class="modal fade" role='dialog'>
+				<div class="modal-dialog modal-lg">
+					<div class='modal-content'>
+						<div class='modal-body'>
+							<table class='table' id='server-hashsign-suite-modal-table'>
+								
+							</table>
+						</div>
+						<div class='modal-footer'>
+							<button type='button' id='server-hashsign-suite-modal-btn' class="btn btn-default" data-dismiss='modal'>Потврди</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+	<script>
+		$(document).ready(function(){
+		
+		  var ciphersuite = [];
+		  var sigalgs = [];
+		  var servercipherspec;
+		  var serverhashsignspec;
+		  var serverpublickey;
+		  var serverrandom;
+		  var clientrandom;
+		
+		  /*$("#start-button").click(function(){
+		    $("#start").hide();
+		    $("#client").css("visibility", "visible");
+		    $("#client").css("animation-play-state", "running");
+		    $("#server").css("visibility", "visible");
+		  });*/
+		  
+		  $("#start-button").click(function(){
+			//$("#client").css("visibility", "hidden");
+			//$("#server").css("visibility", "hidden");
+			$("#start").hide();
+			$("#client1").css("visibility", "visible");
+			$("#server1").css("visibility", "visible");
+			$(".sidenav").css("visibility", "visible");
+			$(".sidenav").append("<ul id='handshake-list' style='list-style-type: none'><li><a id='clienthello-link' href='#'>Конструкција поруке <i>Client Hello</i></a></li></ul>");
+			$(".footer").css('visibility', 'hidden');
+			console.log($('#start-button'));
+		  });
+		  
+		  $(document).on('click', '#clienthello-link', function(){
+		  	$('#clienthello-grid .row').append("<div class='col-lg-1 field-header' data-toggle='tooltip' data-placement='top' title='ознака за протокол руковањa'>22</div><div class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div id='record-length' class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='укупна дужина записа'></div><div id='record-length' class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Client Hello'>01</div><div id='clienthello-length' class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Client Hello'></div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='clienthello-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='random' style='font-size: 15px;'>Генеришите 32В случајних вредности</a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  });
+		  
+		  $(document).on('click', '#random', function(){
+		  	$.ajax({
+		  		url: '/random',
+		  		type: 'GET',
+		  		success: function(data){
+		  			
+		  			clientrandom = data;
+		  			
+		  			var random_data1 = data.substring(0, 12)
+		  			var random_data2 = data.substring(12, 24)
+		  			var random_data3 = data.substring(24, 32)
+		  			
+		  			$('#clienthello-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност клијента'>" + random_data1 + "</div>" + "<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност клијента'>" + random_data2 + "</div>" + "<div class='col-lg-8 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност клијента'>" + random_data3 + "</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина поља идентификатора сесије'>00</div><div class='col-lg-2 field' id='cipher-suite-length' data-toggle='tooltip' data-placement='top' title='дужина скупа комбинација криптографских техника'></div>");
+		  			
+		  			$('#arr-instr').remove();
+		  			
+		  			$('#clienthello-list').append("<li><table><tr><td><button id='cipher-suite' class='button-as-link' style='font-size: 15px;' data-toggle='modal' data-target='#cipher-suite-modal'>Изаберите скуп комбинација криптографских техника</button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  		},
+		  		error: function(error){
+		  			alert(error);
+		  		}
+		  	});
+		  });
+		  
+		  $(document).on('click', '#cipher-suite', function(){
+		  	$('#cipher-suite-modal').modal('show');
+		  });
+		  
+		  $('#cipher-suite-modal td a').each(function(){
+		  	$(this).bind('click', function(e){
+		  		if($('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color') !== 'rgb(174, 214, 241)'){
+		  			$('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color', '#AED6F1');
+		  			ciphersuite.push($('#' + e.currentTarget.attributes['id'].nodeValue)[0].id);	
+		  		}
+		  		else {
+		  			$('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color', 'white');
+		  			ciphersuite.splice(ciphersuite.indexOf($('#' + e.currentTarget.attributes['id'].nodeValue)[0].id), 1);	
+		  		}
+		  	});
+		  });
+		  
+		  $('#modal-btn').click(function(){
+		  	ciphersuite.forEach(function(c){
+		  		$("#clienthello-grid .row").append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='" + $('#' + c)[0].firstChild.data + "'>" + c + "</div>");
+		  	});
+		  	
+		  	$("#clienthello-grid .row").append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина скупа компресионих техника'>0100</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина скупа проширења'>0087</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења renegotiation_info'>ff01</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења renegotiation_info'>0001</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина вредности проширења renegotiation_info'>00</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења server_name'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења server_name'>0016</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина вредности проширења server_name'>0014</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='тип имена сервера: host_name'>00</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина имена сервера'>0011</div><div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='име сервера: asecuritysite.com'>617365637572697479736974652e636f6d</div><div class='col-lg-5 field' data-toggle='tooltip' data-placement='top' title='име сервера: asecuritysite.com'>652e636f6d</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења extended_master_secret'>0017</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења extended_master_secret'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења session_ticket'>0023</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења session_ticket'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења signature_algorithms'>000d</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења signature_algorithms' id='signature-algorithms-suite-length'>&nbsp;</div>");
+		  	
+		  	$.ajax({
+		  		url: '/int2byte',
+		  		type: 'POST',
+		  		data: {number: ciphersuite.length * 2},
+		  		dataType: 'json',
+		  		success: function(data){
+		  			$('#cipher-suite-length').text(data);		
+		  		},
+		  		error: function(error){
+		  			console.log(error);
+		  		}
+		  	});
+		  	
+		  	$('#arr-instr').remove();
+		  	
+		  	$('#clienthello-list').append("<li><table><tr><td><button id='signature-algorithms-suite' class='button-as-link' style='font-size: 15px;' data-toggle='modal' data-target='#signature-algorithms-modal'>Изаберите скуп комбинација хеш алгоритма и алгоритма за дигитално потписивање</button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  });
+		  
+		  $(document).on('click', '#signature-algorithms-suite', function(){
+		  	$('#signature-algorithms-modal').modal('show');
+		  });
+		  
+		  $('#signature-algorithms-modal-btn').click(function(){
+		  	
+		  	sigalgs.forEach(function(c){
+		  		$("#clienthello-grid .row").append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='" + $('#' + c)[0].firstChild.data + "'>" + c + "</div>");
+		  	});
+		  	
+		  	$("#clienthello-grid .row").append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења status_request'>0005</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења status_request'>0005</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='тип начина верификације сертификата'>01</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина листе OCSP провајдера којима клијент верује'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина потпроширења проширења status_request'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења next_protocol_negotiation'>3374</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења next_protocol_negotiation'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења signed_certificate_timestamp'>0012</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења signed_certificate_timestamp'>0000</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења application_layer_protocol_negotiation'>0010</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења application_layer_protocol_negotiation'>001d</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина вредности проширења application_layer_protocol_negotiation'>0009</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина назива протокола вишег нивоа'>08</div><div class='col-lg-8 field' data-toggle='tooltip' data-placement='top' title='назив протокола вишег нивоа: http/1.1'>687474702f312e31</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења ec_point_formats'>000b</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења ec_point_formats'>0002</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина вредности проширења ec_point_formats'>01</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='формат тачке елиптичне криве: некомпресован'>00</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења supported_groups'>000a</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења supported_groups'>0006</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина листе подржаних елиптичних кривих'>0004</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='SECP256R1'>0017</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='SECP384R1'>0018</div>");
+		  	
+		  	$('#clienthello-list').append("<li><table><tr><td><button id='clienthello-send' class='button-as-link' style='font-size: 15px;' >Пошаљите поруку <i>Client Hello</i></button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  
+		  	$('#arr-instr').remove();
+		  
+		  	$.ajax({
+		  		url: '/int2byte',
+		  		type: 'POST',
+		  		data: {number: sigalgs.length * 2},
+		  		dataType: 'json',
+		  		success: function(data){
+		  			$('#signature-algorithms-suite-length').text(data);		
+		  		},
+		  		error: function(error){
+		  			console.log(error);
+		  		}
+		  	});
+		  });
+		  
+		  $('#signature-algorithms-modal td a').each(function(){
+		  	$(this).bind('click', function(e){
+		  		if($('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color') !== 'rgb(174, 214, 241)'){
+		  			$('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color', '#AED6F1');
+		  			sigalgs.push($('#' + e.currentTarget.attributes['id'].nodeValue)[0].id);	
+		  		}
+		  		else {
+		  			$('#' + e.currentTarget.attributes['id'].nodeValue).css('background-color', 'white');
+		  			sigalgs.splice(sigalgs.indexOf($('#' + e.currentTarget.attributes['id'].nodeValue)[0].id), 1);	
+		  		}
+		  	});
+		  });
+		  
+		  $(document).on('click', "#clienthello-send", function(){
+			$('#clienthello-grid').css('animation-name', 'messageclient');
+			$('#clienthello-grid').css('animation-duration', '1s');
+			$('#clienthello-grid').css('animation-timing-function', 'ease-out');
+			$('#clienthello-grid').css('animation-fill-mode', 'forwards');
+			
+			$('#arr-instr').remove();
+			$("#clienthello-list").remove();
+			$("#clienthello-link").remove();
+			$("#handshake-list").append("<li><a id='serverhello-link' href='#'>Конструкција поруке <i>Server Hello</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#serverhello-link', function(){
+		  	$("#serverhello-grid .row").append("<div class='col-lg-1 field-header' data-toggle='tooltip' data-placement='top' title='ознака за протокол руковања'>16</div><div class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='укупна дужина записа'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Server Hello'>01</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Server Hello'>000046</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='serverhello-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='server-random' style='font-size: 15px;'>Генеришите 32В случајних вредности</a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  	
+		  });
+		  
+		  $(document).on('click', '#server-random', function(){
+		  	$.ajax({
+		  		url: '/random',
+		  		type: 'GET',
+		  		success: function(data){
+		  		
+		  			serverrandom = data;
+		  		
+		  			var random_data1 = data.substring(0, 12)
+		  			var random_data2 = data.substring(12, 24)
+		  			var random_data3 = data.substring(24, 32)
+		  			
+		  			$('#serverhello-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност сервера'>" + random_data1 + "</div>" + "<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност сервера'>" + random_data2 + "</div>" + "<div class='col-lg-8 field' data-toggle='tooltip' data-placement='top' title='случајно одабрана вредност сервера'>" + random_data3 + "</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина поља идентификатора сесије'>20</div><div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='идентификатор сесије'>ed2175399c9f02d9168afdbb</div><div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='идентификатор сесије'>d46317564a98a1d985632a</div><div class='col-lg-8 field' data-toggle='tooltip' data-placement='top' title='идентификатор сесије'>c99284de234b5725</div>");
+		  			
+		  			$('#arr-instr').remove();
+		  			
+		  			$('#serverhello-list').append("<li><table><tr><td><button id='server-cipher-suite' class='button-as-link' style='font-size: 15px;' data-toggle='modal' data-target='#server-cipher-suite-modal'>Изаберите комбинацију криптографских техника, које је понудио клијент</button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  			
+		  			ciphersuite.forEach(function(c){
+		  				$('#server-cipher-suite-modal-table').append("<tr><td>" + c + "</td><td><a href='#' id='" + c + "padding' class='list-group-item'>" + $('#' + c)[0].firstChild.data + "</a></td></tr>");
+		  			});
+		  			
+		  			$('#server-cipher-suite-modal td a').each(function(){
+					  	$(this).bind('click', function(e){
+					  		if($('#' + e.currentTarget.id).css('background-color') !== 'rgb(174, 214, 241)'){
+					  			$('#' + e.currentTarget.id).css('background-color', '#AED6F1');
+					  			servercipherspec = e.currentTarget.id;	
+					  			
+					  		}
+					  		else {
+					  			$('#' + e.currentTarget.id).css('background-color', 'white');
+					  		}
+					  	});
+		  			});
+		  		},
+		  		error: function(error){
+		  			alert(error);
+		  		}
+		  	});
+		  });
+		  
+		  $(document).on('click', '#server-cipher-suite-modal-btn', function(){
+		  	$('#serverhello-grid .row').append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='" + $('#' + servercipherspec)[0].firstChild.data + "'>" + servercipherspec.substring(0, 4) + "</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='метод компресије'>00</div>");
+		  	
+		  	$('#serverhello-list').append("<li><table><tr><td><button id='server-hashsign-suite' class='button-as-link' style='font-size: 15px;' data-toggle='modal' data-target='#server-hashsign-suite-modal'>Изаберите комбинацију хеш алгоритма и алгоритма за дигитално потписивање, које је понудио клијент</button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  	
+		  	sigalgs.forEach(function(c){
+		  		$('#server-hashsign-suite-modal-table').append("<tr><td>" + c + "</td><td><a href='#' id='" + c + "padding' class='list-group-item'>" + $('#' + c)[0].firstChild.data + "</a></td></tr>");
+		  		
+		  	});
+		  	
+		  	$('#server-hashsign-suite-modal td a').each(function(){
+				$(this).bind('click', function(e){
+					if($('#' + e.currentTarget.id).css('background-color') !== 'rgb(174, 214, 241)'){
+						$('#' + e.currentTarget.id).css('background-color', '#AED6F1');
+					  	serverhashsignspec = e.currentTarget.id;	
+					}
+					else {
+						$('#' + e.currentTarget.id).css('background-color', 'white');
+					}
+				});
+		  	});
+		  
+		  	$('#arr-instr').remove();
+		  });
+		  
+		  $(document).on('click', '#server-hashsign-suite-modal-btn', function(){
+		  
+		  	$('#serverhello-list').append("<li><table><tr><td><button id='serverhello-send' class='button-as-link' style='font-size: 15px;' >Пошаљите поруку <i>Server Hello</i></button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  	
+		  	$('#serverhello-grid .row').append("<div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења'>0005</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='тип проширења signature_algorithms'>000d</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина проширења signature_algorithms'>0002</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='" + $('#' + serverhashsignspec)[0].firstChild.data + "'>" + serverhashsignspec.substring(0, 4) + "</div>");
+		  	
+		  });
+		  
+		  $(document).on('click', "#serverhello-send", function(){
+			$('#serverhello-grid').css('animation-name', 'messageserver');
+			$('#serverhello-grid').css('animation-duration', '1s');
+			$('#serverhello-grid').css('animation-timing-function', 'ease-out');
+			$('#serverhello-grid').css('animation-fill-mode', 'forwards');
+			
+			$('#arr-instr').remove();
+			$("#serverhello-list").remove();
+			$("#serverhello-link").remove();
+			$("#handshake-list").append("<li><a id='servercert-link' href='#'>Конструкција поруке <i>Certificate</i> (са серверске стране)</a></li>");
+		  });
+		  
+		  $(document).on('click', '#servercert-link', function(){
+		  	$("#servercert-grid .row").append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Certificate'>0b</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Certificate'>&nbsp;</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина ланца сертификата'>&nbsp;</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='servercert-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='server-cert' style='font-size: 15px;'>Генеришите сертификат сервера</a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  	
+		  });
+		  
+		  $(document).on('click', '#server-cert', function(){
+		  	$.ajax({
+		  		url: '/certgen',
+		  		type: 'POST',
+		  		data: {},
+		  		dataType: 'json',
+		  		success: function(data){
+		  			serverpublickey = data['key'];		
+		  			var i;
+		  			for(i=0; i<data['cert'].length/48; i++){
+		  				$('#servercert-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='сертификат'>" + data['cert'].substring(i*48, i*48 + 48) + "</div>");
+		  			}
+
+		  			$('#arr-instr').remove();
+		  			
+		  			$('#servercert-list').append("<li><table><tr><td><button id='servercert-send' class='button-as-link' style='font-size: 15px;' >Пошаљите поруку <i>Certificate</i></button></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li>");
+		  			
+		  		},
+		  		error: function(error){
+		  			console.log(error);
+		  		}
+		  	});
+		  });
+		  
+		  $(document).on('click', '#servercert-send', function(){
+		  	$('#serverhello-grid').remove();
+		  
+		  	$('#servercert-grid').css('animation-name', 'messageservercert');
+			$('#servercert-grid').css('animation-duration', '1s');
+			$('#servercert-grid').css('animation-timing-function', 'ease-out');
+			$('#servercert-grid').css('animation-fill-mode', 'forwards');
+			
+			$('#arr-instr').remove();
+			$("#servercert-list").remove();
+			$("#servercert-link").remove();
+			$("#handshake-list").append("<li><a id='servercertstatus-link' href='#'>Конструкција поруке <i>Certificate Status</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#serverhellodone-link', function(){
+		  	$('#serverhellodone-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Server Hello Done'>0e</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Server Hello Done'>000000</div>");
+		  			
+		  	$('#handshake-list').append("<li><ul id='serverhellodone-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='server-hellodone' style='font-size: 15px;'>Пошаљите поруку <i>Server Hello Done</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  });
+		  
+		  $(document).on('click', '#server-hellodone', function(){
+		  	$('#serverkeyexchange-grid').remove();
+		  	
+		  	$('#serverhellodone-grid').css('animation-name', 'messageserverhellodone');
+			$('#serverhellodone-grid').css('animation-duration', '1s');
+			$('#serverhellodone-grid').css('animation-timing-function', 'ease-out');
+			$('#serverhellodone-grid').css('animation-fill-mode', 'forwards');
+			
+			$('#serverhellodone-list').remove();
+			$('#serverhellodone-link').remove();
+		  	
+		  	$("#handshake-list").append("<li><a id='clientkeyexchange-link' href='#'>Конструкција поруке <i>Client Key Exchange</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#servercertstatus-link', function(){
+		  	$('#servercertstatus-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='тип поруке Certificate Status'>16</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Certificate Status'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='начин провере статуса сертификата: OCSP'>01</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина вредности OCSP статуса'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='вредност OCSP статуса: валидно'>00</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='остатак, који укључује сам сертификат и детаље OCSP провере статуса'>...</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='servercertstatus-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='servercertstatus-send' style='font-size: 15px;'>Пошаљите поруку <i>Certificate Status</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+
+		  });
+		  
+		  $(document).on('click', '#servercertstatus-send', function(){
+		  	$('#servercertstatus-grid').css('animation-name', 'messageservercertstatus');
+			$('#servercertstatus-grid').css('animation-duration', '1s');
+			$('#servercertstatus-grid').css('animation-timing-function', 'ease-out');
+			$('#servercertstatus-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#servercert-grid').remove();
+						
+			$('#arr-instr').remove();
+			$("#servercertstatus-list").remove();
+			$("#servercertstatus-link").remove();
+			$("#handshake-list").append("<li><a id='serverkeyexchange-link' href='#'>Конструкција поруке <i>Server Key Exchange</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#serverkeyexchange-link', function(){
+		  	
+		  	$.ajax({
+				url: '/sign',
+				type: 'POST',
+				data: {data: clientrandom + serverrandom},
+				dataType: 'json',
+				success: function(data){
+				
+					$('#serverkeyexchange-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='тип поруке Server Key Exchange'>0c</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Server Key Exchange'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='тип елиптичне криве: named_curve'>03</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='назив елиптичне криве: secp256r1'>0017</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина јавног кључа'>&nbsp;</div>");
+		  	
+				  	var i;
+				  	for(i=0; i<serverpublickey.length/48; i++){
+				  		$('#serverkeyexchange-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='јавни кључ сервера'>" + serverpublickey.substring(i*48, i*48 + 48) + "</div>");
+				  	}
+				  	
+				  	$('#serverkeyexchange-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='алгоритам дигиталног потписивања: rsa_pss_rsae_sha256'>0804</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина дигиталног потписа'>0100</div>");
+				  	
+				  	var j;
+				  	for(j=0; j<data['signature'].length/48; j++){
+				  		$('#serverkeyexchange-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='дигитални потпис материјала за генерисање кључа'>" + data['signature'].substring(j*48, j*48 + 48) + "</div>");
+				  	}
+				  	
+				  	$('#handshake-list').append("<li><ul id='serverkeyexchange-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='serverkeyexchange-send' style='font-size: 15px;'>Пошаљите поруку <i>Server Key Exchange</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+				},
+				error: function(error){
+					console.log(error);		  		
+				}
+			});
+		  	
+		  });
+		  
+		  $(document).on('click', '#serverkeyexchange-send', function(){
+		  
+		  	$('#servercertstatus-grid').remove();
+		  
+		  	$('#serverkeyexchange-grid').css('animation-name', 'messageserverkeyexchange');
+			$('#serverkeyexchange-grid').css('animation-duration', '1s');
+			$('#serverkeyexchange-grid').css('animation-timing-function', 'ease-out');
+			$('#serverkeyexchange-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#serverkeyexchange-list").remove();
+			$("#serverkeyexchange-link").remove();
+			
+			$("#handshake-list").append("<li><a id='serverhellodone-link' href='#'>Конструкција поруке <i>Server Hello Done</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#clientkeyexchange-link', function(){
+		  	
+		  	$.ajax({
+				url: '/clientpublickey',
+				type: 'GET',
+				dataType: 'json',
+				success: function(data){
+					$('#clientkeyexchange-grid .row').append("<div class='col-lg-1 field-header' data-toggle='tooltip' data-placement='top' title='ознака за протокол руковања'>16</div><div class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field-header' data-toggle='tooltip' data-placement='top' title='укупна дужина записа'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Client Key Exchange'>10</div><div class='col-lg-3 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Client Key Exchange'>&nbsp;</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='дужина јавног кључа клијента'>&nbsp;</div>");
+					
+					var j;
+				  	for(j=0; j<data['clientpublickey'].length/48; j++){
+				  		$('#clientkeyexchange-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='јавни кључ клијента'>" + data['clientpublickey'].substring(j*48, j*48 + 48) + "</div>");
+				  	}
+				  	
+				  	$('#handshake-list').append("<li><ul id='clientkeyexchange-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='clientkeyexchange-send' style='font-size: 15px;'>Пошаљите поруку <i>Client Key Exchange</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+					
+				},
+				error: function(error){
+					console.log(error);		  		
+				}
+			});
+		  });
+		  
+		  $(document).on('click', '#clientkeyexchange-send', function(){
+		  	
+		  	$('#clienthello-grid').remove();
+		  
+		  	$('#clientkeyexchange-grid').css('animation-name', 'messageclientkeyexchange');
+			$('#clientkeyexchange-grid').css('animation-duration', '1s');
+			$('#clientkeyexchange-grid').css('animation-timing-function', 'ease-out');
+			$('#clientkeyexchange-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#clientkeyexchange-list").remove();
+			$("#clientkeyexchange-link").remove();
+			$("#handshake-list").append("<li><a id='clientchangecipherspec-link' href='#'>Конструкција поруке <i>Change Cipher Spec</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#clientchangecipherspec-link', function(){
+		  	$('#clientchangecipherspec-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Change Cipher Spec'>14</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Change Cipher Spec'>0001</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='вредност поруке Change Cipher Spec'>01</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='clientchangecipherspec-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='clientchangecipherspec-send' style='font-size: 15px;'>Пошаљите поруку <i>Change Cipher Spec</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  });
+		  
+		  $(document).on('click', '#clientchangecipherspec-send', function(){
+		  	$('#clientchangecipherspec-grid').css('animation-name', 'messageclientchangecipherspec');
+			$('#clientchangecipherspec-grid').css('animation-duration', '1s');
+			$('#clientchangecipherspec-grid').css('animation-timing-function', 'ease-out');
+			$('#clientchangecipherspec-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#clientchangecipherspec-list").remove();
+			$("#clientchangecipherspec-link").remove();
+			
+			$('#clientkeyexchange-grid').remove();
+			
+			$("#handshake-list").append("<li><a id='clienthandshakefinished-link' href='#'>Конструкција поруке <i>Client Handshake Finished</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#clienthandshakefinished-link', function(){
+		  	
+		  	$.ajax({
+				url: '/encrypt',
+				type: 'GET',
+				success: function(data){
+					
+					console.log('usao')
+					console.log(data)
+					console.log(data.length)
+					
+					$('#clienthandshakefinished-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Client Handshake Finished'>16</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Client Handshake Finished'>&nbsp;</div>");
+					
+					var j;
+				  	for(j=0; j<data.length/48; j++){
+				  		$('#clienthandshakefinished-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='шифрован садржај свих порука размењених између клијента и сервера'>" + data.substring(j*48, j*48 + 48) + "</div>");
+				  	}
+				  	
+				  	$('#handshake-list').append("<li><ul id='clienthandshakefinished-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='clienthandshakefinished-send' style='font-size: 15px;'>Пошаљите поруку <i>Client Handshake Finished</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+					
+				},
+				error: function(error){
+					console.log(error);		  		
+				}
+			});
+		  });
+		  
+		  $(document).on('click', '#clienthandshakefinished-send', function(){
+		  	$('#clienthandshakefinished-grid').css('animation-name', 'messageclienthandshakefinished');
+			$('#clienthandshakefinished-grid').css('animation-duration', '1s');
+			$('#clienthandshakefinished-grid').css('animation-timing-function', 'ease-out');
+			$('#clienthandshakefinished-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#clienthandshakefinished-list").remove();
+			$("#clienthandshakefinished-link").remove();
+			$("#handshake-list").append("<li><a id='serverchangecipherspec-link' href='#'>Конструкција поруке <i>Server Change Cipher Spec</i></a></li>");
+			
+			$('#clientchangecipherspec-grid').remove();
+		  });
+		  
+		  $(document).on('click', '#serverchangecipherspec-link', function(){
+		  	$('#serverchangecipherspec-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Change Cipher Spec'>14</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Change Cipher Spec'>0001</div><div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='вредност поруке Change Cipher Spec'>01</div>");
+		  	
+		  	$('#handshake-list').append("<li><ul id='serverchangecipherspec-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='serverchangecipherspec-send' style='font-size: 15px;'>Пошаљите поруку <i>Server Change Cipher Spec</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+		  });
+		  
+		  $(document).on('click', '#serverchangecipherspec-send', function(){
+		  	$('#serverchangecipherspec-grid').css('animation-name', 'messageserverchangecipherspec');
+			$('#serverchangecipherspec-grid').css('animation-duration', '1s');
+			$('#serverchangecipherspec-grid').css('animation-timing-function', 'ease-out');
+			$('#serverchangecipherspec-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#serverchangecipherspec-list").remove();
+			$("#serverchangecipherspec-link").remove();
+			
+			$('#serverhellodone-grid').remove();
+			
+			$("#handshake-list").append("<li><a id='serverhandshakefinished-link' href='#'>Конструкција поруке <i>Server Handshake Finished</i></a></li>");
+		  });
+		  
+		  $(document).on('click', '#serverhandshakefinished-link', function(){
+		  	$.ajax({
+				url: '/encrypt',
+				type: 'GET',
+				success: function(data){
+					
+					$('#serverhandshakefinished-grid .row').append("<div class='col-lg-1 field' data-toggle='tooltip' data-placement='top' title='ознака поруке Server Handshake Finished'>16</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='ознака верзије протокола'>0303</div><div class='col-lg-2 field' data-toggle='tooltip' data-placement='top' title='дужина поруке Server Handshake Finished'>&nbsp;</div>");
+					
+					var j;
+				  	for(j=0; j<data.length/48; j++){
+				  		$('#serverhandshakefinished-grid .row').append("<div class='col-lg-12 field' data-toggle='tooltip' data-placement='top' title='шифрован садржај свих порука размењених између клијента и сервера'>" + data.substring(j*48, j*48 + 48) + "</div>");
+				  	}
+				  	
+				  	$('#handshake-list').append("<li><ul id='serverhandshakefinished-list' style='color: white; list-style-type: none;'><li><table><tr><td><a href='#' id='serverhandshakefinished-send' style='font-size: 15px;'>Пошаљите поруку <i>Server Handshake Finished</i></a></td><td><i id='arr-instr' class='fas fa-angle-double-left'></i></td></tr></table></li><ul></li>");
+					
+				},
+				error: function(error){
+					console.log(error);		  		
+				}
+			});
+		  });
+		  
+		  $(document).on('click', '#serverhandshakefinished-send', function(){
+		
+			$('#serverchangecipherspec-grid').remove();
+		
+		  	$('#serverhandshakefinished-grid').css('animation-name', 'messageserverchangecipherspec');
+			$('#serverhandshakefinished-grid').css('animation-duration', '1s');
+			$('#serverhandshakefinished-grid').css('animation-timing-function', 'ease-out');
+			$('#serverhandshakefinished-grid').css('animation-fill-mode', 'forwards');
+						
+			$('#arr-instr').remove();
+			$("#serverhandshakefinished-list").remove();
+			$("#serverhandshakefinished-link").remove();
+		
+			
+			$('#start-button')[0].innerText = 'Негоцијација сервера и клијента је завршена. Започните је поново.';
+			$("#start").show();
+			$("#client1").css("visibility", "hidden");
+			$("#server1").css("visibility", "hidden");
+			$(".sidenav").css("visibility", "hidden");
+			//$(".sidenav").append("<ul id='handshake-list' style='list-style-type: none'><li><a id='clienthello-link' href='#'>Конструкција поруке <i>Client Hello</i></a></li></ul>");
+			$(".footer").css('visibility', 'visible');
+			$('#clienthandshakefinished-grid').remove();
+			$('#serverhandshakefinished-grid').remove();
+		  });
+		  
+		});
+	</script>
+</html>
